@@ -1,0 +1,53 @@
+<div class="login-container"> <!-- A classe pode manter o nome, pois a estilização é a mesma -->
+  <div class="login-card"> <!-- A classe pode manter o nome, pois a estilização é a mesma -->
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">Crie sua conta</h2>
+      <p class="text-muted">É rápido e fácil.</p>
+    </div>
+    <form [formGroup]="signonForm" (ngSubmit)="onSubmit()">
+      <!-- Mensagem de erro geral -->
+      @if (errorMessage) {
+        <div class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="floatingName" placeholder="Seu nome" formControlName="name" />
+        <label for="floatingName">Nome</label>
+        @if (signonForm.get('name')?.invalid && signonForm.get('name')?.touched) {
+          <div class="invalid-feedback">O nome é obrigatório.</div>
+        }
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="email" class="form-control" id="floatingInput" placeholder="nome@exemplo.com" formControlName="email" />
+        <label for="floatingInput">Endereço de e-mail</label>
+        @if (signonForm.get('email')?.invalid && signonForm.get('email')?.touched) {
+          <div class="invalid-feedback">Por favor, insira um e-mail válido.</div>
+        }
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="floatingPassword" placeholder="Senha" formControlName="password" />
+        <label for="floatingPassword">Senha</label>
+        @if (signonForm.get('password')?.invalid && signonForm.get('password')?.touched) {
+          <div class="invalid-feedback">
+            A senha deve ter no mínimo 6 caracteres.
+          </div>
+        }
+      </div>
+
+      <button class="w-100 btn btn-lg btn-primary mb-3" type="submit" [disabled]="signonForm.invalid">
+        Cadastrar
+      </button>
+
+      <div class="text-center">
+        <p class="text-muted">
+          Já tem uma conta?
+          <a routerLink="/login" class="text-decoration-none">Faça login</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

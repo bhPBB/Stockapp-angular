@@ -1,0 +1,42 @@
+<div class="container mt-4">
+  <h1 class="mb-4">Teste do Serviço Polygon.io</h1>
+
+  <div class="mb-3">
+    <label for="tickerInput" class="form-label">Ticker da Ação (ex: AAPL, PETR4)</label>
+    <div class="input-group">
+      <input type="text" class="form-control" id="tickerInput" [(ngModel)]="ticker" (keyup.enter)="fetchData()">
+      <button class="btn btn-primary" type="button" (click)="fetchData()">Buscar Dados</button>
+    </div>
+    <div class="form-text">Pressione Enter no campo ou clique no botão para buscar.</div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger mt-3">
+    <h4 class="alert-heading">Ocorreu um Erro!</h4>
+    <p>Houve um problema ao buscar os dados da API. Verifique o console para mais detalhes.</p>
+    <hr>
+    <pre>{{ error | json }}</pre>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <h2>Agregados (Aggregates)</h2>
+      <div *ngIf="aggregates; else loading">
+        <pre>{{ aggregates | json }}</pre>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <h2>Abertura e Fechamento (Open Close)</h2>
+      <div *ngIf="openClose; else loading">
+        <pre>{{ openClose | json }}</pre>
+      </div>
+    </div>
+    <!-- <div class="col-md-4">
+      <h2>Última Cotação (Last Quote)</h2>
+      <div *ngIf="lastQuote; else loading">
+        <pre>{{ lastQuote | json }}</pre>
+      </div>
+    </div> -->
+  </div>
+
+  <ng-template #loading><p>Carregando...</p></ng-template>
+</div>

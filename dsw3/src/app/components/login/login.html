@@ -1,0 +1,48 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">Bem-vindo de volta!</h2>
+      <p class="text-muted">Faça login para continuar</p>
+    </div>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Mensagem de erro geral -->
+      @if (errorMessage) {
+        <div class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <div class="form-floating mb-3">
+        <input
+          type="email"
+          class="form-control"
+          id="floatingInput"
+          placeholder="nome@exemplo.com"
+          formControlName="email"
+        />
+        <label for="floatingInput">Endereço de e-mail</label>
+        @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+          <div class="invalid-feedback">Por favor, insira um e-mail válido.</div>
+        }
+      </div>
+      <div class="form-floating mb-3">
+        <input
+          type="password"
+          class="form-control"
+          id="floatingPassword"
+          placeholder="Senha"
+          formControlName="password"
+        />
+        <label for="floatingPassword">Senha</label>
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <div class="invalid-feedback">A senha é obrigatória.</div>
+        }
+      </div>
+
+      <button class="w-100 btn btn-lg btn-primary mb-3" type="submit" [disabled]="loginForm.invalid">Entrar</button>
+      <div class="text-center">
+        <p class="text-muted">Não tem uma conta? <a routerLink="/signon" class="text-decoration-none">Cadastre-se</a></p>
+      </div>
+    </form>
+  </div>
+</div>
