@@ -11,6 +11,6 @@ export const routes: Routes = [
     { path: 'signon', component: Signon },
     { path: 'polygon-test', component: PolygonTestComponent },
     { path: 'home', component: Home, canActivate: [AuthGuard] },
-    { path: 'detalhes/:ticker', component: Details, canActivate: [AuthGuard] },
+    { path: 'detalhes/:id', component: Details, canActivate: [AuthGuard] },
     { path: '', redirectTo: '/home', pathMatch: 'full' }
 ];

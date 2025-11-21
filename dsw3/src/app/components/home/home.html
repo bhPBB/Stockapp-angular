@@ -1,7 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" routerLink="/home">
-      <!-- Você pode substituir o texto por uma tag <img> para o seu logo -->
       StockManager
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,7 +14,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <!-- O (click) chama o método logout() do componente home.ts -->
           <a class="nav-link" href="#" (click)="$event.preventDefault(); logout()">
             <i class="bi bi-box-arrow-right"></i> Logout
           </a>
@@ -28,53 +26,52 @@
 <main class="container mt-4">
   <h1 class="mb-4">Minhas Ações</h1>
 
-  <!-- Campo para adicionar nova ação -->
-  <div class="mb-3 d-flex gap-2">
-    <input #tickerInput type="text" class="form-control w-auto" placeholder="Digite o código (ex: AAPL)">
-    <button class="btn btn-primary" (click)="getOpenClose(tickerInput.value); tickerInput.value = ''">Adicionar</button>
-  </div>
+  <!-- Formulário para adicionar nova ação -->
+  <form [formGroup]="stockForm" (ngSubmit)="addStock()" class="mb-3 d-flex gap-2">
+    <input id="stockSymbol" formControlName="stockSymbol" placeholder="Digite o código (ex: AAPL)" class="form-control w-auto">
+    <button type="submit" [disabled]="stockForm.invalid" class="btn btn-primary">Adicionar</button>
+  </form>
 
   <!-- Mensagem de erro -->
-  @if (errorMessage) {
-    <div class="alert alert-danger d-flex align-items-center" role="alert">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      <div>{{ errorMessage }}</div>
-    </div>
-  }
+  <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <div>{{ errorMessage }}</div>
+  </div>
 
   <div class="row">
-    @for (card of cards$ | async; track card.codigo) {
+    @for (card of cards$ | async; track card.stockSymbol) {
       <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
         <div class="card h-100">
           <div class="card-body d-flex flex-column">
             <div class="d-flex justify-content-between align-items-start">
-              <h5 class="card-title fw-bold">{{ card.codigo }}</h5>
+              <h5 class="card-title fw-bold">{{ card.stockSymbol }}</h5>
               <span
                 class="badge"
-                [ngClass]="card.variacao >= 0 ? 'bg-success' : 'bg-danger'"
+                [ngClass]="card.variation >= 0 ? 'bg-success' : 'bg-danger'"
               >
-                {{ card.variacao >= 0 ? 'VALORIZAÇÃO' : 'DESVALORIZAÇÃO' }}
+                {{ card.variation >= 0 ? 'VALORIZAÇÃO' : 'DESVALORIZAÇÃO' }}
               </span>
             </div>
-            <p class="card-subtitle mb-2 text-muted">{{ card.nome }}</p>
+            <p class="card-subtitle mb-2 text-muted">{{ card.companyName }}</p>
             <div class="mt-auto">
               <p class="card-text fs-4 fw-bold mb-1">
-                USD {{ card.preco | number:'1.2-2' }}
+                USD {{ card.price | number:'1.2-2' }}
               </p>
               <p
                 class="card-text"
-                [ngClass]="card.variacao >= 0 ? 'text-success' : 'text-danger'"
+                [ngClass]="card.variation >= 0 ? 'text-success' : 'text-danger'"
               >
-                {{ card.variacao >= 0 ? '+' : '' }}{{ card.variacao | number:'1.2-2' }}%
+                {{ card.variation >= 0 ? '+' : '' }}{{ card.variation | number:'1.2-2' }}%
               </p>
-              <a [routerLink]="['/detalhes', card.codigo]" class="btn btn-outline-primary w-100">Ver Detalhes</a>
+              <a [routerLink]="['/detalhes', card.stockSymbol]" class="btn btn-outline-primary w-100">Ver Detalhes</a>
             </div>
           </div>
         </div>
       </div>
-    }
-    @empty {
-      <p>Nenhum cartão para exibir.</p>
+    } @empty {
+      <div class="col-12 text-center">
+        <p>Nenhuma ação adicionada ainda.</p>
+      </div>
     }
   </div>
 </main>

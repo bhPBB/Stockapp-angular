@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { PolygonService } from '../../services/polygon.service';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { GetStocksAggregatesTimespanEnum } from '@polygon.io/client-js';
+import { GetStocksAggregatesTimespanEnum } from '@massive.com/client-js';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -41,7 +41,7 @@ export class Details implements OnInit {
   constructor(private route: ActivatedRoute, private polygon: PolygonService) {}
 
   async ngOnInit() {
-    this.ticker = this.route.snapshot.paramMap.get('ticker')!;
+    this.ticker = this.route.snapshot.paramMap.get('id')!;
     await this.loadChartData();
   }
 

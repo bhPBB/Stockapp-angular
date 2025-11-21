@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../env/environment';
 
 // Interface para a resposta da API de login
 export interface LoginResponse {
@@ -20,7 +21,7 @@ export interface UserResponse {
 })
 export class AuthApiService {
   // A URL agora aponta para o nome do serviço do backend no Docker Compose
-  private apiUrl = 'http://stockapp-backend:8080';
+  private apiUrl = `${environment.apiUrl}`; 
 
   // BehaviorSubject para manter e emitir o estado de autenticação atual
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());

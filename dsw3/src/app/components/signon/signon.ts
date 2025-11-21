@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthApiService } from '../../services/auth-api.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,7 +16,7 @@ export class Signon {
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService,
+    private authService: AuthApiService,
     private router: Router
   ) {
     this.signonForm = this.fb.group({
@@ -32,7 +32,12 @@ export class Signon {
     }
     this.errorMessage = null;
     this.authService.signup(this.signonForm.value).subscribe({
-      next: () => this.router.navigate(['/home']),
+      next: () => {
+        this.authService.login(this.signonForm.value).subscribe({
+          next: () => this.router.navigate(['/home']),
+          error: () => (this.errorMessage = 'Login automático falhou. Por favor, faça login manualmente.'),
+        });
+      },
       error: (err) =>
         (this.errorMessage = 'Não foi possível criar a conta. Tente novamente.'),
     });

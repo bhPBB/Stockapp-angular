@@ -1,20 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../env/environment';
 
 // Interface correspondente à resposta da API (StockDataResponse)
 export interface StockCard {
-  stockId: number;
-  code: string;
-  name: string;
+  stockId: number; // Corresponde a stockId no Java
+  stockSymbol: string; // Corresponde a stockSymbol no Java 
+  companyName: string; // Corresponde a companyName no Java
   price: number;
   variation: number;
 }
 
 // Interface para a criação de um novo stock (StockDataCreation)
 export interface StockCardCreation {
-  code: string;
-  name: string;
+  stockSymbol: string; // Corresponde a stockSymbol no Java
+  companyName: string; // Corresponde a companyName no Java
   price: number;
   variation: number;
 }
@@ -23,15 +24,16 @@ export interface StockCardCreation {
   providedIn: 'root'
 })
 export class StockApiService {
-  private apiUrl = 'http://localhost:8080/stocks'; // URL do seu backend
+  private apiUrl = `${environment.apiUrl}/stocks`; 
   private cardsSubject = new BehaviorSubject<StockCard[]>([]);
   public cards$: Observable<StockCard[]> = this.cardsSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
   // Carrega os stocks da API
-  loadStocks(): Observable<{content: StockCard[]}> {
-    return this.http.get<{content: StockCard[]}>(this.apiUrl).pipe(
+  // O backend retorna um objeto de paginação, então esperamos por { content: ... }
+  loadStocks(): Observable<{ content: StockCard[] }> {
+    return this.http.get<{ content: StockCard[] }>(this.apiUrl).pipe(
       tap(response => {
         this.cardsSubject.next(response.content);
       })
@@ -46,5 +48,10 @@ export class StockApiService {
         this.cardsSubject.next([...currentCards, newCard]);
       })
     );
+  }
+
+  // Busca um único stock pelo ID
+  getStockById(stockId: number): Observable<StockCard> {
+    return this.http.get<StockCard>(`${this.apiUrl}/${stockId}`);
   }
 }
