@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="container mt-4 mb-4">
   <h2>Detalhes da ação: {{ ticker }}</h2>
 
   @if (loading) {
@@ -38,6 +38,21 @@
           </p>
         </div>
       </div>
+
+      <hr class="my-4">
+
+      <!-- Seção de Predições -->
+      <div class="text-center">
+        <button class="btn btn-primary px-4" (click)="togglePredictions()">
+          {{ showPredictions ? 'Ocultar' : 'Ver' }} Previsões de Preço
+        </button>
+      </div>
+
+      @if(showPredictions) {
+        <app-prediction-card [ticker]="ticker!"></app-prediction-card>
+      }
+
+      <hr class="my-4">
       <div class="text-center mt-4">
         <a routerLink="/home" class="btn btn-outline-secondary px-4">
           ← Voltar

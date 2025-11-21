@@ -1,0 +1,49 @@
+<div class="card shadow-sm mx-auto my-4" style="max-width: 28rem;">
+  <div class="card-body p-4">
+    <h3 class="card-title h4 mb-4 text-center">
+      Previsão de Preço para <span class="fw-bold text-primary">{{ ticker }}</span> (1 dia)
+    </h3>
+
+    @if (loading) {
+      <!-- Estado de Carregamento -->
+      <div class="d-flex justify-content-center align-items-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="ms-3 mb-0">Carregando previsões...</p>
+      </div>
+    } @else if (error) {
+      <!-- Estado de Erro -->
+      <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Ocorreu um erro!</h4>
+        <p>{{ error }}</p>
+      </div>
+    } @else if (predictionRF && predictionLR) {
+      <!-- Conteúdo com as Predições -->
+      <div class="row g-3 text-center">
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <h4 class="card-title">Random Forest</h4>
+              <h5 class="card-title h6">Máxima prevista</h5>
+              <p class="card-text fs-4 fw-bold mt-2">R$ {{ predictionRF.highPrediction | number:'1.2-2' }}</p>
+              <h5 class="card-title h6">Mínima prevista</h5>
+              <p class="card-text fs-4 fw-bold mt-2">R$ {{ predictionRF.lowPrediction | number:'1.2-2' }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <h4 class="card-title">Regressão Linear</h4>
+              <h5 class="card-title h6">Máxima prevista</h5>
+              <p class="card-text fs-4 fw-bold mt-2">R$ {{ predictionLR.highPrediction | number:'1.2-2' }}</p>
+              <h5 class="card-title h6">Mínima prevista</h5>
+              <p class="card-text fs-4 fw-bold mt-2">R$ {{ predictionLR.lowPrediction | number:'1.2-2' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

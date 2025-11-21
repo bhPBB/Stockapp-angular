@@ -5,17 +5,19 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { GetStocksAggregatesTimespanEnum } from '@massive.com/client-js';
 import { CommonModule } from '@angular/common';
+import { PredictionCard } from '../prediction-card/prediction-card';
 
 @Component({
   selector: 'app-detalhes',
   standalone: true,
   templateUrl: './details.html',
   styleUrls: ['./details.css'],
-  imports: [BaseChartDirective, RouterModule, CommonModule ]
+  imports: [BaseChartDirective, RouterModule, CommonModule, PredictionCard ]
 })
 export class Details implements OnInit {
   ticker!: string;
   loading = true;
+  showPredictions = false;
 
   chartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   chartOptions: ChartConfiguration['options'] = {
@@ -103,5 +105,9 @@ export class Details implements OnInit {
     } finally {
       this.loading = false;
     }
+  }
+
+  togglePredictions() {
+    this.showPredictions = !this.showPredictions;
   }
 }
