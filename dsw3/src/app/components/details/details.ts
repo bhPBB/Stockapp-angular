@@ -6,6 +6,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { GetStocksAggregatesTimespanEnum } from '@massive.com/client-js';
 import { CommonModule } from '@angular/common';
 import { PredictionCard } from '../prediction-card/prediction-card';
+import { AuthApiService } from '../../services/auth-api.service';
 
 @Component({
   selector: 'app-detalhes',
@@ -40,7 +41,11 @@ export class Details implements OnInit {
   variation: number | null = null;
   lastClose: number | null = null;
 
-  constructor(private route: ActivatedRoute, private polygon: PolygonService) {}
+  constructor(
+    private route: ActivatedRoute, 
+    private polygon: PolygonService,
+    private authService: AuthApiService
+  ) {}
 
   async ngOnInit() {
     this.ticker = this.route.snapshot.paramMap.get('id')!;
@@ -109,5 +114,9 @@ export class Details implements OnInit {
 
   togglePredictions() {
     this.showPredictions = !this.showPredictions;
+  }
+
+    logout(): void {
+    this.authService.logout();
   }
 }

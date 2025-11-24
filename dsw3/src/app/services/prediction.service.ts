@@ -33,15 +33,6 @@ export class PredictionService {
   constructor(private http: HttpClient, private polygonService: PolygonService) {}
 
   /**
-   * Executa a predição para o modelo Random Forest.
-   * @param ticker O símbolo da ação (ex: "AAPL").
-   * @returns Uma Promise com a predição de alta e baixa.
-   */
-  async predictRF(ticker: string): Promise<PredictionResponse> {
-    return this.predict(ticker);
-  }
-
-  /**
    * Executa a predição para o modelo Linear Regression.
    * @param ticker O símbolo da ação (ex: "AAPL").
    * @returns Uma Promise com a predição de alta e baixa.

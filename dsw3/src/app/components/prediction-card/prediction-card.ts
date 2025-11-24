@@ -14,7 +14,6 @@ export class PredictionCard implements OnInit {
   loading = true;
   error: string | null = null;
 
-  predictionRF: PredictionResponse | null = null;
   predictionLR: PredictionResponse | null = null;
 
   constructor(private predictionService: PredictionService) {}
@@ -30,18 +29,16 @@ export class PredictionCard implements OnInit {
     this.error = null;
 
     try {
-      // Executa as duas chamadas de predição em paralelo
-      const [rf, lr] = await Promise.all([
-        this.predictionService.predictRF(this.ticker),
+      // Executa a chamada de predição em paralelo
+      const [lr] = await Promise.all([
         this.predictionService.predictLR(this.ticker)
       ]);
 
-      this.predictionRF = rf;
       this.predictionLR = lr;
 
     } catch (err: any) {
-      console.error('Erro ao buscar predições:', err);
-      this.error = err.message || 'Não foi possível carregar as predições. Tente novamente mais tarde.';
+      console.error('Erro ao buscar predição:', err);
+      this.error = err.message || 'Não foi possível carregar a predição. Tente novamente mais tarde.';
     } finally {
       this.loading = false;
     }

@@ -21,6 +21,8 @@ export class Home implements OnInit, OnDestroy {
   stockForm: FormGroup;
   errorMessage: string | null = null;
   private cardsSubscription: Subscription;
+  isLoading = true;
+  private backendStockSymbols: Set<string> = new Set();
   private currentCards: StockCard[] = [];
 
   constructor(
@@ -40,27 +42,77 @@ export class Home implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // 1️⃣ Carrega dados do Local Storage
-    const savedCards = localStorage.getItem('stockCards');
-    if (savedCards) {
-      this.currentCards = JSON.parse(savedCards);
-      this.cardsSubject.next([...this.currentCards]);
-    }
+    this.loadAndRefreshCards();
+  }
 
-    // 2️⃣ Carrega dados do backend (sem price, apenas para registro)
-    this.stockApiService.loadStocks().subscribe(response => {
-      response.content.forEach(card => {
-        // Só adiciona se não estiver no Local Storage
-        if (!this.currentCards.find(c => c.stockSymbol === card.stockSymbol)) {
-          this.currentCards.push(card);
+  private async loadAndRefreshCards(): Promise<void> {
+    this.isLoading = true;
+
+    // 1. Carrega os dados do localStorage primeiro para uma exibição rápida
+    const savedCardsRaw = localStorage.getItem('stockCards');
+    const savedCards: StockCard[] = savedCardsRaw ? JSON.parse(savedCardsRaw) : [];
+    this.currentCards = savedCards;
+    this.cardsSubject.next([...this.currentCards]);
+
+    // 2. Carrega os símbolos do backend e combina com os do localStorage, sem duplicatas
+    this.stockApiService.loadStocks().subscribe(async (response) => {
+      const savedSymbols = new Set(this.currentCards.map(c => c.stockSymbol));
+      const backendSymbols = response.content.map(c => c.stockSymbol);
+      this.backendStockSymbols = new Set(backendSymbols);
+      const allSymbols = new Set([...savedSymbols, ...backendSymbols]);
+
+      // 3. Atualiza os dados de cada ação individualmente
+      for (const symbol of allSymbols) {
+        try {
+          const date = this.getMostRecentTradingDay();
+          const stockDetails = await this.polygonService.getOpenClose(symbol, date);
+
+          if (stockDetails.status === 'OK' && stockDetails.from) {
+            const aggregates = await this.polygonService.getAggregates(
+              symbol, 1, GetStocksAggregatesTimespanEnum.Day,
+              this.getPastDate(30), this.getToday()
+            );
+
+            let variation = 0;
+            if (aggregates.results && aggregates.results.length > 1) {
+              const firstClose = aggregates.results[0].c;
+              const lastClose = aggregates.results[aggregates.results.length - 1].c;
+              if (firstClose > 0) variation = ((lastClose - firstClose) / firstClose) * 100;
+            }
+
+            const cardIndex = this.currentCards.findIndex(c => c.stockSymbol === symbol);
+            const updatedCard: StockCard = { stockId: Date.now(), stockSymbol: stockDetails.symbol, companyName: stockDetails.from, price: stockDetails.close, variation: variation };
+
+            if (cardIndex > -1) {
+              this.currentCards[cardIndex] = updatedCard;
+            } else {
+              this.currentCards.push(updatedCard);
+            }
+
+            this.cardsSubject.next([...this.currentCards]);
+            localStorage.setItem('stockCards', JSON.stringify(this.currentCards));
+          }
+        } catch (error) {
+          console.error(`Erro ao atualizar dados para a ação "${symbol}":`, error);
         }
-      });
-      this.cardsSubject.next([...this.currentCards]);
+      }
+      this.isLoading = false;
     });
   }
 
   ngOnDestroy(): void {
     this.cardsSubscription.unsubscribe();
+  }
+
+  deleteStock(stockSymbol: string): void {
+    // 1. Remove o card da lista local
+    this.currentCards = this.currentCards.filter(card => card.stockSymbol !== stockSymbol);
+
+    // 2. Atualiza o Observable para refletir na UI
+    this.cardsSubject.next([...this.currentCards]);
+
+    // 3. Atualiza o localStorage
+    localStorage.setItem('stockCards', JSON.stringify(this.currentCards));
   }
 
   async addStock(): Promise<void> {
@@ -99,7 +151,7 @@ export class Home implements OnInit, OnDestroy {
       let variation = 0;
       if (aggregates.results && aggregates.results.length > 1) {
         const closes = aggregates.results.map(r => r.c);
-        const firstClose = closes[0];
+        const firstClose = closes[0]; // Alterado para pegar o primeiro fechamento
         const lastClose = closes[closes.length - 1];
         if (firstClose) variation = ((lastClose - firstClose) / firstClose) * 100;
       }
@@ -125,6 +177,15 @@ export class Home implements OnInit, OnDestroy {
         price: 0,
         variation: 0
       }).subscribe();
+      // 5️⃣ Se a ação for nova (não existe no backend), adiciona.
+      if (!this.backendStockSymbols.has(newStockData.stockSymbol)) {
+        this.stockApiService.addStock({
+          stockSymbol: newStockData.stockSymbol,
+          companyName: newStockData.companyName,
+          price: 0, // O preço real não precisa ser salvo no backend
+          variation: 0 // A variação real não precisa ser salva no backend
+        }).subscribe(() => this.backendStockSymbols.add(newStockData.stockSymbol));
+      }
 
       this.stockForm.reset();
 
@@ -148,5 +209,15 @@ export class Home implements OnInit, OnDestroy {
     else date.setDate(date.getDate() - 1); // outros → dia anterior
 
     return date.toISOString().split('T')[0]; // YYYY-MM-DD
+  }
+
+  private getToday(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  private getPastDate(days: number): string {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    return date.toISOString().split('T')[0];
   }
 }
